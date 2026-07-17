@@ -1,7 +1,6 @@
 /*
 ========================================================================================
 PROJECT: Data Centralization - Medallion Architecture (Bronze Layer)
-AUTHOR: Ramón López (Analytics Engineer)
 SOURCE SYSTEM: SAP ERP (Instance P01) / Database: P01
 TARGET SYSTEM: SQL Server (DWH) / Database: ANALISIS_DATOS
 SCHEMA: bronze
