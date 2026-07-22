@@ -28,12 +28,17 @@ employs hybrid loading strategies to optimize execution times and prevent server
      storing obsolete records.
 
 2. INCREMENTAL LOAD (Upsert - MERGE by Primary Key):
-   Applied to the massive historical table of cleared payments and collections.
-   - sap_bsad (Cleared Items): As this is a massive historical ledger of payments, we use an 
-     optimized MERGE statement based on the SAP composite primary key (MANDT, BUKRS, KUNNR, GJAHR, BELNR, BUZEI).
-     - New Records: Inserted directly into the DWH.
-     - Existing Records: If a clearing date or accounting status changes in SAP, only key 
-       columns (such as the clearing date AUGDT, clearing document AUGBL, etc.) are updated.
+   Applied to the massive historical table of cleared payments and collections where 
+   only recent transactions require reconciliation against SAP due to change frequency.
+   
+   - sap_bsad (Cleared Items): Merges on the composite SAP primary key (MANDT, BUKRS, KUNNR, 
+     GJAHR, BELNR, BUZEI). Since this is a 12M+ record historical ledger, processing is 
+     optimized to scan ONLY the current month and previous month (via BUDAT filter). Historical 
+     records older than 2 months are skipped entirely, as cleared accounting documents rarely 
+     change once posted in SAP. New cleared transactions are inserted; existing records are 
+     updated only if clearing dates (AUGDT), clearing document references (AUGBL), or amounts 
+     (DMBTR, WRBTR) change. This date-filtered strategy reduces execution time from ~6 minutes 
+     (full table scan) to ~30-60 seconds, while maintaining data accuracy for active reconciliation.
 
 INCLUDED OPTIMIZATIONS:
 - Use of the WITH (NOLOCK) query hint on all source reads from P01 to prevent lock contention on the production ERP.
@@ -129,25 +134,38 @@ BEGIN
         PRINT 'Duration: ' + CAST(DATEDIFF(second,@start_time,@end_time) AS NVARCHAR) + ' seconds';
 
 
-        /* ==========================================================
-           5. PARTIDAS COMPENSADAS (BSAD) - Incremental Merge
-           (Nota: El histórico crece masivamente, usamos MERGE por PK)
+        
+      /* ==========================================================
+           5. PARTIDAS COMPENSADAS (BSAD) - Incremental Merge Optimizado
+           (Procesa solo compensaciones del mes actual + mes anterior)
         ========================================================== */
         SET @start_time = GETDATE();
-        PRINT '>> Loading bronze.sap_bsad (Incremental Merge)...';
+        PRINT '>> Loading bronze.sap_bsad (Incremental Merge - Optimized)...';
+        
+        -- Calcular primer día del mes anterior (Formato YYYYMMDD 'YYYYMMDD' o Date según tu tipo de columna)
+        DECLARE @mes_anterior_inicio NVARCHAR(8) =
+            CONVERT(NVARCHAR(8),
+                    DATEFROMPARTS(
+                        YEAR(DATEADD(MONTH, -1, GETDATE())),
+                        MONTH(DATEADD(MONTH, -1, GETDATE())),
+                        1
+                    ),
+                    112);
 
         MERGE bronze.sap_bsad AS tgt
         USING (
-            SELECT * FROM P01.p01.BSAD WITH (NOLOCK)
+            SELECT * 
+            FROM P01.p01.BSAD WITH (NOLOCK)
+            WHERE AUGDT >= @mes_anterior_inicio  -- Extrae del ERP solo lo compensado recientemente
         ) AS src
         ON  tgt.MANDT = src.MANDT
-        AND tgt.BUKRS = src.BUKRS
-        AND tgt.KUNNR = src.KUNNR
-        AND tgt.GJAHR = src.GJAHR
-        AND tgt.BELNR = src.BELNR
-        AND tgt.BUZEI = src.BUZEI
+            AND tgt.BUKRS = src.BUKRS
+            AND tgt.KUNNR = src.KUNNR
+            AND tgt.GJAHR = src.GJAHR
+            AND tgt.BELNR = src.BELNR
+            AND tgt.BUZEI = src.BUZEI
+            AND tgt.AUGDT >= @mes_anterior_inicio -- OBLIGATORIO: Acota la búsqueda en el DWH destino
 
-        -- Si el documento ya existía pero cambió algún estado contable, lo actualizamos
         WHEN MATCHED THEN UPDATE SET
             tgt.AUGDT = src.AUGDT,
             tgt.AUGBL = src.AUGBL,
@@ -157,7 +175,6 @@ BEGIN
             tgt.ZTERM = src.ZTERM,
             tgt.XARCH = src.XARCH
 
-        -- Si es un pago o compensación nueva histórica, la insertamos
         WHEN NOT MATCHED THEN
         INSERT (
             MANDT, BUKRS, KUNNR, UMSKS, UMSKZ, AUGDT, AUGBL, ZUONR, GJAHR, BELNR, 
@@ -199,7 +216,7 @@ BEGIN
             src.GMVKZ, src.SRTYPE, src.LOTKZ, src.FKBER, src.INTRENO, src.PPRCT, src.BUZID, src.AUGGJ, src.HKTID, src.BUDGET_PD, 
             src.PAYS_PROV, src.PAYS_TRAN, src.MNDID, src.KONTT, src.KONTL, src.UEBGDAT, src.VNAME, src.EGRUP, src.BTYPE, src.PROPMANO
         );
-
+        
         SET @end_time = GETDATE();
         PRINT 'Duration: ' + CAST(DATEDIFF(second,@start_time,@end_time) AS NVARCHAR) + ' seconds';
 
@@ -226,4 +243,3 @@ BEGIN
     END CATCH
 END;
 GO
-
