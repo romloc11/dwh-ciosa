@@ -135,25 +135,28 @@ BEGIN
 
 
         
-        /* ==========================================================
+      /* ==========================================================
            5. PARTIDAS COMPENSADAS (BSAD) - Incremental Merge Optimizado
-           (Solo procesa mes actual + mes anterior)
+           (Procesa solo compensaciones del mes actual + mes anterior)
         ========================================================== */
         SET @start_time = GETDATE();
         PRINT '>> Loading bronze.sap_bsad (Incremental Merge - Optimized)...';
         
-        -- Calcular primer día del mes anterior y último día del mes actual
-        DECLARE @mes_anterior_inicio DATE = DATEFROMPARTS(YEAR(DATEADD(MONTH, -1, GETDATE())), MONTH(DATEADD(MONTH, -1, GETDATE())), 1);
-        DECLARE @mes_actual_fin DATE = EOMONTH(GETDATE());
-        
-        PRINT 'Procesando período: ' + CAST(@mes_anterior_inicio AS NVARCHAR(10)) + ' a ' + CAST(@mes_actual_fin AS NVARCHAR(10));
-        
+        -- Calcular primer día del mes anterior (Formato YYYYMMDD 'YYYYMMDD' o Date según tu tipo de columna)
+        DECLARE @mes_anterior_inicio NVARCHAR(8) =
+            CONVERT(NVARCHAR(8),
+                    DATEFROMPARTS(
+                        YEAR(DATEADD(MONTH, -1, GETDATE())),
+                        MONTH(DATEADD(MONTH, -1, GETDATE())),
+                        1
+                    ),
+                    112);
+
         MERGE bronze.sap_bsad AS tgt
         USING (
             SELECT * 
             FROM P01.p01.BSAD WITH (NOLOCK)
-            WHERE BUDAT >= @mes_anterior_inicio  -- 📌 FILTRO CRÍTICO: Solo meses relevantes
-              AND BUDAT <= @mes_actual_fin
+            WHERE AUGDT >= @mes_anterior_inicio  -- Extrae del ERP solo lo compensado recientemente
         ) AS src
         ON  tgt.MANDT = src.MANDT
             AND tgt.BUKRS = src.BUKRS
@@ -161,6 +164,8 @@ BEGIN
             AND tgt.GJAHR = src.GJAHR
             AND tgt.BELNR = src.BELNR
             AND tgt.BUZEI = src.BUZEI
+            AND tgt.AUGDT >= @mes_anterior_inicio -- OBLIGATORIO: Acota la búsqueda en el DWH destino
+
         WHEN MATCHED THEN UPDATE SET
             tgt.AUGDT = src.AUGDT,
             tgt.AUGBL = src.AUGBL,
@@ -169,6 +174,7 @@ BEGIN
             tgt.ZFBDT = src.ZFBDT,
             tgt.ZTERM = src.ZTERM,
             tgt.XARCH = src.XARCH
+
         WHEN NOT MATCHED THEN
         INSERT (
             MANDT, BUKRS, KUNNR, UMSKS, UMSKZ, AUGDT, AUGBL, ZUONR, GJAHR, BELNR, 
