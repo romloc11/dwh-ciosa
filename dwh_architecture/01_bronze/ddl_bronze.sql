@@ -11,6 +11,11 @@ DESCRIPTION: DDL creation for the general customer master table using
 ===============================================================================
 */
 
+
+  
+-- ============================================================================
+-- 1. TABLE: bronze.sap_kna1 (Customer - COMPLETE)
+-- ============================================================================
 IF OBJECT_ID('bronze.sap_kna1', 'U') IS NOT NULL 
     DROP TABLE bronze.sap_kna1;
 GO
