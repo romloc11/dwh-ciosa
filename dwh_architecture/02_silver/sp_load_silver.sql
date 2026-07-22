@@ -20,7 +20,6 @@ BEGIN
             
         )
         SELECT 
-            TRIM(MANDT), --mandante
             TRIM(KUNNR), --clave cliente
             TRIM(STCD1), -- rfc
             TRIM(NAME1), -- nombre
@@ -47,7 +46,8 @@ BEGIN
             TRIM(KTR7), --tiempo de entrega paq2
             TRIM(KTR8) --tiempo de entrega paq3
 
-        FROM bronze.sap_kna1 WITH (NOLOCK);
+        FROM bronze.sap_kna1 WITH (NOLOCK)
+        WHERE MANDT = '400';
 
         SET @end_time = GETDATE();
         PRINT 'Duration: ' + CAST(DATEDIFF(SECOND, @start_time, @end_time) AS NVARCHAR) + ' s';
