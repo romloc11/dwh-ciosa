@@ -286,48 +286,94 @@ GO
 
 
 -- ============================================================================
--- TABLE: bronze.sap_knvv (Customer Sales Data - COMPLETE)
+-- 4 TABLE: bronze.sap_knvv (Customer Sales Data - EXACT SOURCE STRUCTURE)
 -- ============================================================================
 IF OBJECT_ID('bronze.sap_knvv', 'U') IS NOT NULL 
     DROP TABLE bronze.sap_knvv;
 GO
 
 CREATE TABLE bronze.sap_knvv (
-    MANDT      NVARCHAR(3) NOT NULL,   -- Mandante
-    KUNNR      NVARCHAR(10) NOT NULL,  -- Número de cliente
-    VKORG      NVARCHAR(4) NOT NULL,   -- Organización de ventas
-    VTWEG      NVARCHAR(2) NOT NULL,   -- Canal de distribución
-    SPART      NVARCHAR(2) NOT NULL,   -- Sector / División
-    ERNAM      NVARCHAR(12),           -- Nombre del responsable que creó el objeto
-    ERDAT      NVARCHAR(8),            -- Fecha de creación (YYYYMMDD)
-    BEGRU      NVARCHAR(4),            -- Grupo de autorización
-    LOEVM      NVARCHAR(1),            -- Petición de borrado para el registro
-    VERSG      NVARCHAR(1),            -- Esquema de estadística de cliente
-    AUFSD      NVARCHAR(2),            -- Bloqueo de pedido para el cliente
-    CALSG      NVARCHAR(1),            -- Esquema de calendario
-    BOKRE      NVARCHAR(1),            -- Cliente abonable para rappel
-    KURRF      NVARCHAR(1),            -- Factor del tipo de cambio
-    PRFRE      NVARCHAR(1),            -- Determinación de precio
-    KLABC      NVARCHAR(1),            -- Clasificación de clientes (ABC)
-    WAERS      NVARCHAR(5),            -- Moneda de la cuenta
-    KTGRD      NVARCHAR(2),            -- Grupo de imputación para este cliente
-    ZTERM      NVARCHAR(4),            -- Clave de condiciones de pago / Plazo
-    VWERK      NVARCHAR(4),            -- Centro de suministro (Planta por defecto)
-    VKGRP      NVARCHAR(3),            -- Grupo de vendedores
-    VKBUR      NVARCHAR(4),            -- Oficina de ventas
-    INCO1      NVARCHAR(3),            -- Incoterms parte 1
-    INCO2      NVARCHAR(28),           -- Incoterms parte 2
-    LPRIO      NVARCHAR(2),            -- Prioridad de entrega
-    VSBED      NVARCHAR(2),            -- Condiciones de expedición
-    ANTLF      DECIMAL(1,0),           -- Límite de entregas parciales
-    KZAZU      NVARCHAR(1),            -- Indicador de pedido conjunto
-    AWAHR      NVARCHAR(3),            -- Probabilidad de pedido
-    SPERZ      NVARCHAR(1),            -- Bloqueo de facturación para el cliente
+    MANDT              NVARCHAR(3) NOT NULL,
+    KUNNR              NVARCHAR(10) NOT NULL,
+    VKORG              NVARCHAR(4) NOT NULL,
+    VTWEG              NVARCHAR(2) NOT NULL,
+    SPART              NVARCHAR(2) NOT NULL,
+    ERNAM              NVARCHAR(12),
+    ERDAT              NVARCHAR(8),
+    BEGRU              NVARCHAR(4),
+    LOEVM              NVARCHAR(1),
+    VERSG              NVARCHAR(1),
+    AUFSD              NVARCHAR(2),
+    KALKS              NVARCHAR(1),
+    KDGRP              NVARCHAR(2),
+    BZIRK              NVARCHAR(6),
+    KONDA              NVARCHAR(2),
+    PLTYP              NVARCHAR(2),
+    AWAHR              NVARCHAR(3),
+    INCO1              NVARCHAR(3),
+    INCO2              NVARCHAR(28),
+    LIFSD              NVARCHAR(2),
+    AUTLF              NVARCHAR(1),
+    ANTLF              DECIMAL(1,0),
+    KZTLF              NVARCHAR(1),
+    KZAZU              NVARCHAR(1),
+    CHSPL              NVARCHAR(1),
+    LPRIO              NVARCHAR(2),
+    EIKTO              NVARCHAR(12),
+    VSBED              NVARCHAR(2),
+    FAKSD              NVARCHAR(2),
+    MRNKZ              NVARCHAR(1),
+    PERFK              NVARCHAR(2),
+    PERRL              NVARCHAR(2),
+    KVAKZ              NVARCHAR(1),
+    KVAWT              DECIMAL(13,2),
+    WAERS              NVARCHAR(5),
+    KLABC              NVARCHAR(2),
+    KTGRD              NVARCHAR(2),
+    ZTERM              NVARCHAR(4),
+    VWERK              NVARCHAR(4),
+    VKGRP              NVARCHAR(3),
+    VKBUR              NVARCHAR(4),
+    VSORT              NVARCHAR(10),
+    KVGR1              NVARCHAR(3),
+    KVGR2              NVARCHAR(3),
+    KVGR3              NVARCHAR(3),
+    KVGR4              NVARCHAR(3),
+    KVGR5              NVARCHAR(3),
+    BOKRE              NVARCHAR(1),
+    BOIDT              NVARCHAR(8),
+    KURST              NVARCHAR(4),
+    PRFRE              NVARCHAR(1),
+    PRAT1              NVARCHAR(1),
+    PRAT2              NVARCHAR(1),
+    PRAT3              NVARCHAR(1),
+    PRAT4              NVARCHAR(1),
+    PRAT5              NVARCHAR(1),
+    PRAT6              NVARCHAR(1),
+    PRAT7              NVARCHAR(1),
+    PRAT8              NVARCHAR(1),
+    PRAT9              NVARCHAR(1),
+    PRATA              NVARCHAR(1),
+    KABSS              NVARCHAR(4),
+    KKBER              NVARCHAR(4),
+    CASSD              NVARCHAR(2),
+    RDOFF              NVARCHAR(1),
+    AGREL              NVARCHAR(1),
+    MEGRU              NVARCHAR(4),
+    UEBTO              DECIMAL(3,1),
+    UNTTO              DECIMAL(3,1),
+    UEBTK              NVARCHAR(1),
+    PVKSM              NVARCHAR(2),
+    PODKZ              NVARCHAR(1),
+    PODTG              DECIMAL(11,0),
+    BLIND              NVARCHAR(1),
+    CARRIER_NOTIF      NVARCHAR(1),
+    [/BEV1/EMLGPFAND]  NVARCHAR(1),
+    [/BEV1/EMLGFORTS]  NVARCHAR(1),
     CONSTRAINT PK_sap_knvv PRIMARY KEY CLUSTERED (MANDT, KUNNR, VKORG, VTWEG, SPART)
 );
-PRINT 'Table bronze.sap_knvv created successfully using exact SAP lengths.';
+PRINT 'Table bronze.sap_knvv created successfully using exact SAP source structure.';
 GO
-
 
 -- ============================================================================
 -- 4. TABLE: bronze.sap_bsid (Open Items - Accounts Receivable - COMPLETE)
