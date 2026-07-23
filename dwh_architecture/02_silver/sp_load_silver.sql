@@ -119,6 +119,19 @@ BEGIN
             TRIM(ERDAT), -- fecha en la que se creo el registro de credito en sap
             TRIM(CTLPC), --prioridad
             TRIM(CRBLB), --Bloqueo de pedido temporal
+            TRIM(NXTRV), -- fecha de proxima revision limite de credito
+            TRIM(KRAUS), -- etiqueta creditoc, contadoloc, etc
+            TRIM(SBGRT), --investigacion cliente (revisar si cuenta con propiedades)
+            TRIM(REVDB), 
+            TRIM(AEDAT), -- fecha de ultima modicacion en datos de credito de cliente
+            TRIM(AETXT),
+            TRIM(AENAM), -- persona que hizo la ultima modificacion en datos de credito de cliente
+            TRIM(SBDAT),
+            TRIM(KDGRP), -- pagare, contrato, negativa, etc
+            TRIM(CASHD), -- fecha de ultimo pago 
+            TRIM(CASHA), -- monto del ultimo pago
+            TRIM(CASHC), -- tipo de moneda de ultimo pago
+            TRIM(DBRTG), -- ADN
         FROM bronze.sap_knkk WITH (NOLOCK);
 
         SET @end_time = GETDATE();
