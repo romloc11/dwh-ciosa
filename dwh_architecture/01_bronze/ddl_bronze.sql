@@ -283,6 +283,52 @@ CREATE TABLE bronze.sap_knkk (
 PRINT 'Table bronze.sap_knkk created successfully using exact SAP lengths.';
 GO
 
+
+
+-- ============================================================================
+-- TABLE: bronze.sap_knvv (Customer Sales Data - COMPLETE)
+-- ============================================================================
+IF OBJECT_ID('bronze.sap_knvv', 'U') IS NOT NULL 
+    DROP TABLE bronze.sap_knvv;
+GO
+
+CREATE TABLE bronze.sap_knvv (
+    MANDT      NVARCHAR(3) NOT NULL,   -- Mandante
+    KUNNR      NVARCHAR(10) NOT NULL,  -- Número de cliente
+    VKORG      NVARCHAR(4) NOT NULL,   -- Organización de ventas
+    VTWEG      NVARCHAR(2) NOT NULL,   -- Canal de distribución
+    SPART      NVARCHAR(2) NOT NULL,   -- Sector / División
+    ERNAM      NVARCHAR(12),           -- Nombre del responsable que creó el objeto
+    ERDAT      NVARCHAR(8),            -- Fecha de creación (YYYYMMDD)
+    BEGRU      NVARCHAR(4),            -- Grupo de autorización
+    LOEVM      NVARCHAR(1),            -- Petición de borrado para el registro
+    VERSG      NVARCHAR(1),            -- Esquema de estadística de cliente
+    AUFSD      NVARCHAR(2),            -- Bloqueo de pedido para el cliente
+    CALSG      NVARCHAR(1),            -- Esquema de calendario
+    BOKRE      NVARCHAR(1),            -- Cliente abonable para rappel
+    KURRF      NVARCHAR(1),            -- Factor del tipo de cambio
+    PRFRE      NVARCHAR(1),            -- Determinación de precio
+    KLABC      NVARCHAR(1),            -- Clasificación de clientes (ABC)
+    WAERS      NVARCHAR(5),            -- Moneda de la cuenta
+    KTGRD      NVARCHAR(2),            -- Grupo de imputación para este cliente
+    ZTERM      NVARCHAR(4),            -- Clave de condiciones de pago / Plazo
+    VWERK      NVARCHAR(4),            -- Centro de suministro (Planta por defecto)
+    VKGRP      NVARCHAR(3),            -- Grupo de vendedores
+    VKBUR      NVARCHAR(4),            -- Oficina de ventas
+    INCO1      NVARCHAR(3),            -- Incoterms parte 1
+    INCO2      NVARCHAR(28),           -- Incoterms parte 2
+    LPRIO      NVARCHAR(2),            -- Prioridad de entrega
+    VSBED      NVARCHAR(2),            -- Condiciones de expedición
+    ANTLF      DECIMAL(1,0),           -- Límite de entregas parciales
+    KZAZU      NVARCHAR(1),            -- Indicador de pedido conjunto
+    AWAHR      NVARCHAR(3),            -- Probabilidad de pedido
+    SPERZ      NVARCHAR(1),            -- Bloqueo de facturación para el cliente
+    CONSTRAINT PK_sap_knvv PRIMARY KEY CLUSTERED (MANDT, KUNNR, VKORG, VTWEG, SPART)
+);
+PRINT 'Table bronze.sap_knvv created successfully using exact SAP lengths.';
+GO
+
+
 -- ============================================================================
 -- 4. TABLE: bronze.sap_bsid (Open Items - Accounts Receivable - COMPLETE)
 -- ============================================================================
