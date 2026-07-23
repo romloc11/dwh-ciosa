@@ -118,8 +118,24 @@ BEGIN
         PRINT 'Duration: ' + CAST(DATEDIFF(second,@start_time,@end_time) AS NVARCHAR) + ' seconds';
 
 
+
+      /* ==========================================================
+           4. DATOS DE VENTAS DE CLIENTE (KNVV) - Full Truncate & Load
+        ========================================================== */
+        SET @start_time = GETDATE();
+        PRINT '>> Loading bronze.sap_knvv (Full Load)...';
+
+        TRUNCATE TABLE bronze.sap_knvv;
+
+        INSERT INTO bronze.sap_knvv
+        SELECT * FROM P01.p01.KNVV WITH (NOLOCK);
+
+        SET @end_time = GETDATE();
+        PRINT 'Duration: ' + CAST(DATEDIFF(second,@start_time,@end_time) AS NVARCHAR) + ' seconds';
+
+
         /* ==========================================================
-           4. PARTIDAS ABIERTAS (BSID) - Full Truncate & Load
+           5. PARTIDAS ABIERTAS (BSID) - Full Truncate & Load
            (Nota: Se vacía diario porque las facturas pagadas desaparecen de aquí)
         ========================================================== */
         SET @start_time = GETDATE();
@@ -136,7 +152,7 @@ BEGIN
 
         
       /* ==========================================================
-           5. PARTIDAS COMPENSADAS (BSAD) - Incremental Merge Optimizado
+           6. PARTIDAS COMPENSADAS (BSAD) - Incremental Merge Optimizado
            (Procesa solo compensaciones del mes actual + mes anterior)
         ========================================================== */
         SET @start_time = GETDATE();
