@@ -20,6 +20,7 @@ BEGIN
             
         )
         SELECT 
+            TRIM(MANDT), -- mandante
             TRIM(KUNNR), --clave cliente
             TRIM(STCD1), -- rfc
             TRIM(NAME1), -- nombre
@@ -70,13 +71,18 @@ BEGIN
             sector, funcion_interlocutor, interlocutor_id
         )
         SELECT 
-            TRIM(MANDT),
-            TRIM(KUNNR),
-            TRIM(VKORG),
-            TRIM(VTWEG),
-            TRIM(SPART),
-            TRIM(PARVW),
-            TRIM(KUNN2)
+            TRIM(MANDT), -- mandante
+            TRIM(KUNNR), -- codigo cliente
+            TRIM(KUNN2), --codigos alternos
+            TRIM(VKORG), -- sociedad
+            TRIM(VTWEG), -- canal
+            TRIM(SPART), -- sector
+            TRIM(PARVW), -- tipo interlocutor
+            TRIM(KUNN2), --cliente hijo
+            TRIM(PARZA), -- contador
+            TRIM(PERNR), -- id interlocutor
+            TRIM(LIFNR), -- id_paqueteria
+            TRIM(DEFPA) -- flag defecto (preferencia)
         FROM bronze.sap_knvp WITH (NOLOCK);
 
         SET @end_time = GETDATE();
