@@ -106,13 +106,19 @@ BEGIN
             saldo_mantenido, moneda, bloqueado_credito
         )
         SELECT 
-            TRIM(MANDT),
-            TRIM(KUNNR),
-            TRIM(KKBER),
-            ISNULL(KLIMK, 0),
-            ISNULL(SKFOR, 0),
-            TRIM(WAERS),
-            TRIM(CRBLB)
+            TRIM(MANDT), -- mandante
+            TRIM(KUNNR), -- codigo cliente
+            TRIM(KNKLI), -- codigo padre
+            TRIM(KKBER), --
+            ISNULL(KLIMK, 0), --limite de credito
+            ISNULL(SKFOR, 0), -- monto de facturas abiertas 
+            ISNULL(SAUFT, 0), -- monto de pedidos aun no facturados
+            ISNULL(SSOBL, 0), -- especiales/pagares
+            TRIM(UEDAT), --fecha ultima revision limite credito
+            TRIM(ERNAM), --usuario que creo el registro de credito en sap
+            TRIM(ERDAT), -- fecha en la que se creo el registro de credito en sap
+            TRIM(CTLPC), --prioridad
+            TRIM(CRBLB), --Bloqueo de pedido temporal
         FROM bronze.sap_knkk WITH (NOLOCK);
 
         SET @end_time = GETDATE();
